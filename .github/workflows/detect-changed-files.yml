@@ -1,0 +1,35 @@
+name: Track Markdown Changes
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - main
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Get changed markdown files
+        id: changed-files
+        uses: tj-actions/changed-files@v47
+        with:
+          files: |
+            **.md
+
+      - name: Display changed files
+        if: steps.changed-files.outputs.any_changed == 'true'
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          echo "変更されたMarkdownファイル:"
+          for file in ${CHANGED_FILES}; do
+            echo "  - $file"
+          done
+
+      - name: No changes detected
+        if: steps.changed-files.outputs.any_changed == 'false'
+        run: echo "Markdownファイルの変更はありませんでした"
